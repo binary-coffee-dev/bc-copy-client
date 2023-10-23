@@ -1,25 +1,39 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QFileSystemModel>
-
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    // start webSocket client
-//    client = new WsClient(QUrl(QStringLiteral("ws://localhost:9001")));
-//    connect(client, &WsClient::onTreeChange, this, &MainWindow::onTreeChangeEvent);
-//    connect(client, &WsClient::onCopyMessage, this, &MainWindow::onCopyEvent);
-//    connect(client, &WsClient::onAuthResponse, this, &MainWindow::onAuthEvent);
-
-    // local directory
-//    localDirectory = QString("/home/gonzalezext/opt/data/copy-service");
-//    loadLocalDirectory();
     AppSingleton::instance();
+
+    QStringList headers;
+    headers << tr("Name") << tr("Progress") << tr("Down rate") << tr("Status");
+
+    QTreeWidget *list = ui->copiesList;
+    list->setItemDelegate(new CopyViewDelegate(list));
+    list->setHeaderLabels(headers);
+//    list->setSelectionBehavior(QAbstractItemView::SelectRows);
+    list->setAlternatingRowColors(true);
+    list->setRootIsDecorated(false);
+
+    QFontMetrics fm = fontMetrics();
+    QHeaderView *header = list->header();
+    header->resizeSection(0, fm.horizontalAdvance("file-name"));
+    header->resizeSection(1, fm.horizontalAdvance(headers.at(1) + "  "));
+    header->resizeSection(2, qMax(fm.horizontalAdvance(headers.at(2) + "  "), fm.horizontalAdvance(" 1234.0 KB/s ")));
+    header->resizeSection(4, qMax(fm.horizontalAdvance(headers.at(3) + "  "), fm.horizontalAdvance(tr("Downloading") + "  ")));
+
+//    list->setItemWidget(progress, );
+//    list->addItem(progress);
+
+    updateCopiesList();
+//    updateCopiesList();
+//    updateCopiesList();
+//    updateCopiesList();
+//    updateCopiesList();
 }
 
 MainWindow::~MainWindow()
@@ -44,3 +58,14 @@ void MainWindow::on_newCopies_clicked()
     filesTree->show();
 }
 
+void MainWindow::updateCopiesList()
+{
+    QTreeWidgetItem *item = new QTreeWidgetItem(ui->copiesList);
+
+    item->setText(0, "some");
+    item->setText(1, "");
+    item->setText(2, "some");
+    item->setText(3, "some");
+
+    ui->copiesList->addTopLevelItem(item);
+}
