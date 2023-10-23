@@ -13,17 +13,26 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
+    appsingleton.cpp \
     copythread.cpp \
+    filestree.cpp \
         mainwindow.cpp \
     itemmodel.cpp \
+    properties.cpp \
     wsclient.cpp
 
 HEADERS  += mainwindow.h \
+    appsingleton.h \
+    constvariables.h \
     copythread.h \
+    filestree.h \
     itemmodel.h \
+    properties.h \
     wsclient.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    filestree.ui \
+    properties.ui
 
 RESOURCES += \
     icons.qrc

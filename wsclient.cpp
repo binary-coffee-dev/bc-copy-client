@@ -1,20 +1,12 @@
 #include "wsclient.h"
+#include "qmessagebox.h"
 
 #include <QtWebSockets/QWebSocket>
 
-WsClient::WsClient(const QUrl &url, QObject *parent) :
-    QObject(parent), url(url)
+WsClient::WsClient(QSettings *settings, QObject *parent) : QObject(parent), settings(settings)
 {
-    qDebug() << "Server url: " << url;
+    authStatus = false;
     qDebug()<<"SSL version use for build: "<<QSslSocket::sslLibraryBuildVersionString();
-
-    websocket = new QWebSocket(QString(), QWebSocketProtocol::VersionLatest);
-
-    connect(websocket, &QWebSocket::connected, this, &WsClient::onConnected);
-    connect(websocket, &QWebSocket::disconnected, this, &WsClient::onClosed);
-    connect(websocket, &QWebSocket::textMessageReceived, this, &WsClient::onTextMessageReceived);
-
-    websocket->open(url);
 }
 
 void WsClient::sendTextMessage(QString message)
@@ -25,12 +17,15 @@ void WsClient::sendTextMessage(QString message)
 void WsClient::onClosed()
 {
     qDebug() << "Client disconnected";
+    authStatus = false;
 }
 
 void WsClient::onConnected()
 {
-    qDebug() << "Client connected";
-    authorization("test", "g0qycWPxJp-turMI");
+    QString clientName = settings->value(Constants::clientNameConfigName(), "").toString();
+    QString clientKey = settings->value(Constants::clientKeyConfigName(), "").toString();
+    qDebug() << "Client connected" << clientName << clientKey;
+    authorization(clientName, clientKey);
 }
 
 void WsClient::onTextMessageReceived(QString message)
@@ -44,6 +39,10 @@ void WsClient::onTextMessageReceived(QString message)
     switch (type) {
     case AUTH_MSG:
         qDebug() << "Auth response";
+
+        // set auth
+        authStatus = jsonMessage.object().value("status").toString() == "accepted";
+
         onAuthResponse(jsonMessage);
         break;
     case TREE_MSG:
@@ -79,21 +78,26 @@ MessageType WsClient::unregisterMessage(int id)
 
 void WsClient::getTree()
 {
-    qDebug() << "Get tree from server";
-    int id = generateMessageId();
-    registerMessage(id, TREE_MSG);
-    sendTextMessage(QString("{\"id\": %1,\"type\":\"TreeMsg\"}").arg(QString::number(id)));
+    if (authStatus) {
+        qDebug() << "Get tree from server";
+        int id = generateMessageId();
+        registerMessage(id, TREE_MSG);
+        sendTextMessage(QString("{\"id\": %1,\"type\":\"TreeMsg\"}").arg(QString::number(id)));
+    }
 }
 
 int WsClient::copyRequest(int start, int end, QString hash)
 {
-    qDebug() << "Copy request message";
-    int id = generateMessageId();
-    registerMessage(id, COPY_MSG);
-    QString cpyMsg = QString("{\"type\":\"CopyMsg\", \"id\": %1, \"start\": %2, \"end\": %3, \"file_hash\": \"%4\"}")
-                         .arg(QString::number(id), QString::number(start), QString::number(end), hash);
-    sendTextMessage(cpyMsg);
-    return id;
+    if (authStatus) {
+        qDebug() << "Copy request message";
+        int id = generateMessageId();
+        registerMessage(id, COPY_MSG);
+        QString cpyMsg = QString("{\"type\":\"CopyMsg\", \"id\": %1, \"start\": %2, \"end\": %3, \"file_hash\": \"%4\"}")
+                             .arg(QString::number(id), QString::number(start), QString::number(end), hash);
+        sendTextMessage(cpyMsg);
+        return id;
+    }
+    return -1;
 }
 
 void WsClient::authorization(QString name, QString password)
@@ -102,4 +106,23 @@ void WsClient::authorization(QString name, QString password)
     int id = generateMessageId();
     registerMessage(id, AUTH_MSG);
     sendTextMessage(QString("{\"id\": %1, \"name\": \"%2\", \"key\":\"%3\", \"type\":\"AuthMsg\"}").arg(QString::number(id), name, password));
+}
+
+bool WsClient::connectToServer()
+{
+    QString domain = settings->value(Constants::domainConfigName(), "").toString();
+    qDebug() << "Server url: " << domain;
+    if (domain != "") {
+        websocket = new QWebSocket(QString(), QWebSocketProtocol::VersionLatest);
+
+        connect(websocket, &QWebSocket::connected, this, &WsClient::onConnected);
+        connect(websocket, &QWebSocket::disconnected, this, &WsClient::onClosed);
+        connect(websocket, &QWebSocket::textMessageReceived, this, &WsClient::onTextMessageReceived);
+
+        websocket->open(QUrl(domain));
+    } else {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid server url.");
+        msgBox.exec();
+    }
 }

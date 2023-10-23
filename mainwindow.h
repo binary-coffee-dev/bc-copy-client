@@ -4,10 +4,12 @@
 #include <QMainWindow>
 #include <QDir>
 #include <QPair>
+#include <QJsonDocument>
 
 #include "itemmodel.h"
-#include "wsclient.h"
-#include "copythread.h"
+#include "appsingleton.h"
+#include "properties.h"
+#include "filestree.h"
 
 namespace Ui {
 class MainWindow;
@@ -21,31 +23,15 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-protected:
-    void onTreeChangeEvent(QJsonDocument json);
-    void onCopyEvent(QJsonDocument json);
-    void onAuthEvent(QJsonDocument json);
-
 private slots:
-    void on_pushButton_clicked();
+    void on_actionProperties_triggered();
 
-    void on_pushButton_2_clicked();
+    void on_actionClose_triggered();
 
-    void on_pushButton_3_clicked();
-
-    QPair<QString, TreeItemType> getFileType(QString fileName);
-
-    void loadLocalDirectory();
-    void createParentPaths(TreeItem *treeItem);
-    void createChildrenPaths(TreeItem *treeItem);
-    QList<TreeItem*> listOfCopyItems(TreeItem *treeItem);
+    void on_newCopies_clicked();
 
 private:
     Ui::MainWindow *ui;
-    WsClient *client;
-    CopyThread *copyThread;
-
-    QString localDirectory;
 };
 
 #endif // MAINWINDOW_H

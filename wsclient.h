@@ -4,6 +4,9 @@
 #include <QObject>
 #include <QtWebSockets/QtWebSockets>
 #include <QMap>
+#include <QMessageBox>
+
+#include "constvariables.h"
 
 enum MessageType { TREE_MSG, AUTH_MSG, COPY_MSG, UNKOWN };
 
@@ -11,12 +14,13 @@ class WsClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit WsClient(const QUrl &url, QObject *parent = Q_NULLPTR);
+    WsClient(QSettings *settings, QObject *parent = Q_NULLPTR);
 
     void sendTextMessage(QString message);
     void getTree();
     int copyRequest(int start, int end, QString hash);
     void authorization(QString name, QString password);
+    bool connectToServer();
 
 Q_SIGNALS:
     void onTreeChange(QJsonDocument json);
@@ -33,8 +37,9 @@ protected:
     MessageType unregisterMessage(int id);
 
 private:
+    QSettings *settings;
     QWebSocket *websocket;
-    QUrl url;
+    bool authStatus;
 
     QMap<int, MessageType> messages;
 };

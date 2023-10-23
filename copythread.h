@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "wsclient.h"
+#include "constvariables.h"
 
 enum CopyStatus { READY, RUNNING, PAUSE, FINISH };
 
@@ -41,7 +42,7 @@ class CopyThread : public QObject
 {
     Q_OBJECT
 public:
-    explicit CopyThread(WsClient *client, QString *lp, QObject *parent = nullptr);
+    explicit CopyThread(WsClient *client, QSettings *settings, QObject *parent = nullptr);
 
     void reanudateCopies();
     bool requestCopy(CopyItem *copyItem);
@@ -49,6 +50,7 @@ public:
     void appendCopy(QString path, QString hash, int size);
     bool fileExist(CopyItem *ci);
     void createFileIfNotExist(CopyItem *ci);
+    QString getLocalPath();
 
 signals:
 
@@ -60,7 +62,7 @@ private:
     WsClient *client;
     const int maxCopies = 2;
     const int chunkSize = 255;
-    QString *localPath;
+    QSettings settings;
 
     int copiesCount = 0;
     QMutex copiesCountMutex;

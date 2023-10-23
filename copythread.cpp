@@ -1,7 +1,7 @@
 #include "copythread.h"
 
-CopyThread::CopyThread(WsClient *client, QString *lp, QObject *parent)
-    : QObject{parent}, client(client), localPath(lp)
+CopyThread::CopyThread(WsClient *client, QSettings *settings, QObject *parent)
+    : QObject{parent}, client(client), settings(settings)
 {}
 
 void CopyThread::reanudateCopies()
@@ -71,7 +71,7 @@ void CopyThread::onCopyData(QJsonDocument json)
         // todo
     }
 
-    QFile file((*localPath) + ci->getPath());
+    QFile file(getLocalPath() + ci->getPath());
     file.open(QIODevice::Append);
     file.write(QByteArray::fromBase64(data.toUtf8()));
     file.close();
@@ -104,7 +104,7 @@ void CopyThread::appendCopy(QString path, QString hash, int size)
 
 bool CopyThread::fileExist(CopyItem *ci)
 {
-    QString filePath = (*localPath) + ci->getPath();
+    QString filePath = getLocalPath() + ci->getPath();
     qDebug() << filePath;
     return QFileInfo::exists(filePath);
 }
@@ -112,8 +112,13 @@ bool CopyThread::fileExist(CopyItem *ci)
 void CopyThread::createFileIfNotExist(CopyItem *ci)
 {
     if (!fileExist(ci)) {
-        QFile file((*localPath) + ci->getPath());
+        QFile file(getLocalPath() + ci->getPath());
         file.open(QIODevice::WriteOnly);
         file.close();
     }
+}
+
+QString CopyThread::getLocalPath()
+{
+    return settings.value(Constants::localDirectoryConfigName()).toString();
 }
