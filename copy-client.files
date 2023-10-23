@@ -1,0 +1,8 @@
+copy-client.pro
+itemmodel.cpp
+itemmodel.h
+main.cpp
+mainwindow.cpp
+mainwindow.h
+wsclient.cpp
+wsclient.h

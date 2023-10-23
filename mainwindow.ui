@@ -28,13 +28,13 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>40</y>
+      <y>20</y>
       <width>80</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>Sync</string>
+     <string>Copy</string>
     </property>
     <property name="checkable">
      <bool>false</bool>
@@ -47,7 +47,7 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>70</y>
+      <y>50</y>
       <width>80</width>
       <height>23</height>
      </rect>
@@ -66,6 +66,19 @@
      </rect>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>210</y>
+      <width>81</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Sync</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -73,7 +86,7 @@
      <x>0</x>
      <y>0</y>
      <width>672</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuApp">

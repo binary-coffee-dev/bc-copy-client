@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui websockets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,10 +13,17 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
+    copythread.cpp \
         mainwindow.cpp \
-    itemmodel.cpp
+    itemmodel.cpp \
+    wsclient.cpp
 
 HEADERS  += mainwindow.h \
-    itemmodel.h
+    copythread.h \
+    itemmodel.h \
+    wsclient.h
 
 FORMS    += mainwindow.ui
+
+RESOURCES += \
+    icons.qrc
